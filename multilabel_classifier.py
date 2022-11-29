@@ -73,7 +73,7 @@ if __name__ == '__main__':
         os.makedirs(output_dir)
 
     url2cat_df = pd.read_pickle('fc_claims_with_cat.pkl')
-    url2cat_df['categories'] = url2cat_df['categories'].apply(lambda x: ast.literal_eval(x))
+    #url2cat_df['categories'] = url2cat_df['categories'].apply(lambda x: ast.literal_eval(x))
 
     mlb = MultiLabelBinarizer()
     mlb = mlb.fit(url2cat_df['categories'].tolist())
