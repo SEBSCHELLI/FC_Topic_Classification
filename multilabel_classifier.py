@@ -93,7 +93,7 @@ if __name__ == '__main__':
     print('load model and tokenizer')
     tokenizer = AutoTokenizer.from_pretrained(**tokenizer_config)
     tokenizer.save_pretrained("tokenizer")
-    model = AutoModelForSequenceClassification.from_pretrained(config['name'], num_labels=25, problem_type='multi_label_classification').cuda()
+    model = AutoModelForSequenceClassification.from_pretrained(config['name'], num_labels=len(mlb.classes_), problem_type='multi_label_classification').cuda()
 
     train_data["text"] = train_data["text"].str.lower()
     eval_data["text"] = eval_data["text"].str.lower()
