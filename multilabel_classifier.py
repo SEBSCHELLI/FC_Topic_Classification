@@ -79,10 +79,10 @@ if __name__ == '__main__':
     mlb = mlb.fit(url2cat_df['categories'].tolist())
 
     train_data = url2cat_df.sample(frac=0.8, random_state=0, replace=False).reset_index(drop=True)
-    train_data_other = train_data[train_data['categories'].apply(lambda x: x == ['Other'])]
-    train_data_other = train_data_other.sample(n=200, random_state=0)
-    train_data_not_other = train_data[train_data['categories'].apply(lambda x: x != ['Other'])]
-    train_data = pd.concat([train_data_other, train_data_not_other])
+    #train_data_other = train_data[train_data['categories'].apply(lambda x: x == ['Other'])]
+    #train_data_other = train_data_other.sample(n=200, random_state=0)
+    #train_data_not_other = train_data[train_data['categories'].apply(lambda x: x != ['Other'])]
+    #train_data = pd.concat([train_data_other, train_data_not_other])
     train_labels = mlb.transform(train_data['categories'].tolist()) * 1.0
     train_data['label'] = train_labels.tolist()
 
