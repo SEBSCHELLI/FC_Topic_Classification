@@ -9,9 +9,8 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.preprocessing import MultiLabelBinarizer
 
-if "crossref_url_extraction" not in os.getcwd():
-    os.chdir("crossref_url_extraction")
-
+if "FC_Topic_Classification" not in os.getcwd():
+    os.chdir("FC_Topic_Classification")
 
 def sigmoid(z):
     return 1/(1 + np.exp(-z))
