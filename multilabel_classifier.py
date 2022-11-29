@@ -95,8 +95,8 @@ if __name__ == '__main__':
     tokenizer.save_pretrained("tokenizer")
     model = AutoModelForSequenceClassification.from_pretrained(config['name'], num_labels=25, problem_type='multi_label_classification').cuda()
 
-    train_data["text"] = train_data["text"].str.lower()
-    eval_data["text"] = eval_data["text"].str.lower()
+    train_data["text"] = train_data["claim"].str.lower()
+    eval_data["text"] = eval_data["claim"].str.lower()
 
     print('transform data to Datasets')#
     train_dataset = Dataset.from_pandas(train_data[['text', 'label']])
