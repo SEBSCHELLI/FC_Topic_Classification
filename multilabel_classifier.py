@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     model_id = 'roberta-base'
 
-    input_type = 'claim'
+    input_type = 'text'
 
     model_configs = {'roberta-base': {'name': 'roberta-base',
                                          'tokenizer_config': {'pretrained_model_name_or_path': 'roberta-base',
