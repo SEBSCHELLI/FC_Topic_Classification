@@ -52,8 +52,8 @@ if __name__ == '__main__':
     model_configs = {'roberta-base': {'name': 'roberta-base',
                                          'tokenizer_config': {'pretrained_model_name_or_path': 'roberta-base',
                                                               'max_len': 100 if input_type == 'claim' else 512}, #100 when claims
-                                        'dataloader_config':{'per_device_train_batch_size': 8,
-                                                             'per_device_eval_batch_size': 8}}
+                                        'dataloader_config':{'per_device_train_batch_size': 32 if input_type == 'claim' else 8,
+                                                             'per_device_eval_batch_size': 32 if input_type == 'claim' else 8}}
                      }
 
     config = model_configs[model_id]
