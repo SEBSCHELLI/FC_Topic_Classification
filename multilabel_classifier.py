@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     model_id = 'roberta-base'
 
-    input_type = 'text'
+    input_type = 'text+claim'
 
     model_configs = {'roberta-base': {'name': 'roberta-base',
                                          'tokenizer_config': {'pretrained_model_name_or_path': 'roberta-base',
@@ -76,8 +76,10 @@ if __name__ == '__main__':
 
     if input_type == 'claim':
         url2cat_df = pd.read_pickle('fc_claims_with_cat.pkl')
-    else:
+    elif input_type == 'text':
         url2cat_df = pd.read_pickle('fc_texts_with_cat.pkl', compression='gzip')
+    else:
+        url2cat_df = pd.read_pickle('fc_claims_and_texts_with_cat.pkl', compression='gzip')
 
     #url2cat_df['categories'] = url2cat_df['categories'].apply(lambda x: ast.literal_eval(x))
 
