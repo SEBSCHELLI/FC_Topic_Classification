@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.preprocessing import MultiLabelBinarizer
 
 if "FC_Topic_Classification" not in os.getcwd():
-    os.chdir("FC_Topic_Classification")
+    os.chdir("/home/schellsn/FC_Topic_Classification")
 
 def sigmoid(z):
     return 1/(1 + np.exp(-z))
@@ -47,9 +47,11 @@ if __name__ == '__main__':
 
     model_id = 'roberta-base'
 
+    input_type = 'claim'
+
     model_configs = {'roberta-base': {'name': 'roberta-base',
                                          'tokenizer_config': {'pretrained_model_name_or_path': 'roberta-base',
-                                                              'max_len': 512},
+                                                              'max_len': 100 if input_type == 'claim' else 512}, #100 when claims
                                         'dataloader_config':{'per_device_train_batch_size': 8,
                                                              'per_device_eval_batch_size': 8}}
                      }
@@ -72,11 +74,12 @@ if __name__ == '__main__':
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
-    url2cat_df = pd.read_pickle('fc_claims_with_cat.pkl')
-    #url2cat_df['categories'] = url2cat_df['categories'].apply(lambda x: ast.literal_eval(x))
+    if input_type == 'claim':
+        url2cat_df = pd.read_pickle('fc_claims_with_cat.pkl')
+    else:
+        url2cat_df = pd.read_pickle('fc_texts_with_cat.pkl', compression='gzip')
 
-    #guns to crime
-    #legal to politics
+    #url2cat_df['categories'] = url2cat_df['categories'].apply(lambda x: ast.literal_eval(x))
 
     mlb = MultiLabelBinarizer()
     mlb = mlb.fit(url2cat_df['categories'].tolist())
@@ -86,6 +89,7 @@ if __name__ == '__main__':
     #train_data_other = train_data_other.sample(n=200, random_state=0)
     #train_data_not_other = train_data[train_data['categories'].apply(lambda x: x != ['Other'])]
     #train_data = pd.concat([train_data_other, train_data_not_other])
+
     train_labels = mlb.transform(train_data['categories'].tolist()) * 1.0
     train_data['label'] = train_labels.tolist()
 
@@ -101,27 +105,33 @@ if __name__ == '__main__':
     train_data["text"] = train_data["text"].str.lower()
     eval_data["text"] = eval_data["text"].str.lower()
 
-    print('transform data to Datasets')#
+    print('transform data to Datasets')
     train_dataset = Dataset.from_pandas(train_data[['text', 'label']])
     eval_dataset = Dataset.from_pandas(eval_data[['text', 'label']])
 
     print('tokenize tweets')
     def tokenize_function(examples):
-        #model_inputs = tokenizer(examples["text"])
-        #return {"len": len(model_inputs['input_ids'])}
-
         model_inputs = tokenizer(examples["text"], max_length=tokenizer_config['max_len'], truncation=True, padding='max_length')
         model_inputs["labels"] = examples['label']
         return model_inputs
 
     train_dataset = train_dataset.map(tokenize_function, batched=True, batch_size=8)
-    eval_dataset = eval_dataset.map(tokenize_function, batched=True, batch_size=8)
+    eval_dataset = eval_dataset.map(tokenize_function, batched=False, batch_size=8)
 
-    """import matplotlib.pyplot as plt
+
+    """
+    import matplotlib.pyplot as plt
+    
+    def tokenize_function(examples):
+        model_inputs = tokenizer(examples["text"])
+        return {"len": len(model_inputs['input_ids'])}
+        
+    eval_dataset = eval_dataset.map(tokenize_function, batched=False, batch_size=1)
     lens = eval_dataset['len']
     lens = pd.DataFrame({'len': lens})
     lens.hist(bins=30)
-    plt.show()"""
+    plt.show()
+    """
 
     print('set up Trainer')
 
