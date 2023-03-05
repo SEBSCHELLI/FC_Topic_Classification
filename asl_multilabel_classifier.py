@@ -14,6 +14,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 import torch.nn as nn
 from transformers.modeling_outputs import SequenceClassifierOutput
 
+print(os.getcwd())
 if "FC_Topic_Classification" not in os.getcwd():
     os.chdir("/home/schellsn/FC_Topic_Classification")
 
