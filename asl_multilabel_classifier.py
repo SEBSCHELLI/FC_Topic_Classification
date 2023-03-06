@@ -233,7 +233,7 @@ class ASL_RobertaForSequenceClassification(RobertaForSequenceClassification):
 if __name__ == '__main__':
     model_id = 'roberta-base'
 
-    input_type = 'claim+text'
+    input_type = 'claim'
 
     model_configs = {'roberta-base': {'name': 'roberta-base',
                                       'tokenizer_config': {'pretrained_model_name_or_path': 'roberta-base',
@@ -267,31 +267,22 @@ if __name__ == '__main__':
     claimskg_df_with_tags = pd.read_pickle('claimskg_df_tags.pkl', compression='gzip')
     claim_topics_gold = pd.read_pickle('claim_topics_gold.pkl')
 
-    claimskg_df_with_tags = claimskg_df_with_tags[
-        claimskg_df_with_tags['transformed_extra_tags'].apply(lambda x: True if len(x) > 0 else False)]
-    claimskg_df_with_tags = claimskg_df_with_tags[
-        ~claimskg_df_with_tags['claimReview_url'].isin(claim_topics_gold['claimReview_url'])]
+    claimskg_df_with_tags = claimskg_df_with_tags[claimskg_df_with_tags['transformed_extra_tags'].apply(lambda x: True if len(x) > 0 else False)]
+    claimskg_df_with_tags = claimskg_df_with_tags[~claimskg_df_with_tags['claimReview_url'].isin(claim_topics_gold['claimReview_url'])]
+
+    test_ws = "fullfact"
+    wandb.config.test_ws = test_ws
+    train_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] != test_ws]
+    dev_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] == test_ws]
+    # train_data = claimskg_df_with_tags.sample(frac=0.8, random_state=0, replace=False).reset_index(drop=True).copy()
+    # dev_data = claimskg_df_with_tags[~claimskg_df_with_tags['claimReview_url'].isin(train_data['claimReview_url'])].copy()
 
     mlb = MultiLabelBinarizer()
     mlb = mlb.fit(claimskg_df_with_tags['transformed_extra_tags'].tolist())
 
-    train_data = claimskg_df_with_tags.sample(frac=0.8, random_state=0, replace=False).reset_index(drop=True).copy()
-    # train_data_other = train_data[train_data['transformed_extra_tags'].apply(lambda x: x == ['Other'])]
-    # train_data_other = train_data_other.sample(n=200, random_state=0)
-    # train_data_not_other = train_data[train_data['transformed_extra_tags'].apply(lambda x: x != ['Other'])]
-    # train_data = pd.concat([train_data_other, train_data_not_other])
-    exclude_ws = "fullfact"
-    wandb.config.exclude_ws = exclude_ws
-
-    print(len(train_data))
-    train_data = train_data[train_data['claimReview_source'] != exclude_ws]
-    print(len(train_data))
-
     train_labels = mlb.transform(train_data['transformed_extra_tags'].tolist()) * 1.0
     train_data['label'] = train_labels.tolist()
 
-    dev_data = claimskg_df_with_tags[
-        ~claimskg_df_with_tags['claimReview_url'].isin(train_data['claimReview_url'])].copy()
     dev_labels = mlb.transform(dev_data['transformed_extra_tags'].tolist()) * 1.0
     dev_data['label'] = dev_labels.tolist()
 
