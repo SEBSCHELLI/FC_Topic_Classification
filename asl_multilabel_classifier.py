@@ -234,7 +234,7 @@ class ASL_RobertaForSequenceClassification(RobertaForSequenceClassification):
 if __name__ == '__main__':
     model_id = 'roberta-base'
 
-    input_type = 'claim'
+    input_type = 'claim+text'
 
     model_configs = {'roberta-base': {'name': 'roberta-base',
                                       'tokenizer_config': {'pretrained_model_name_or_path': 'roberta-base',
@@ -271,7 +271,7 @@ if __name__ == '__main__':
     claimskg_df_with_tags = claimskg_df_with_tags[claimskg_df_with_tags['transformed_extra_tags'].apply(lambda x: True if len(x) > 0 else False)]
     claimskg_df_with_tags = claimskg_df_with_tags[~claimskg_df_with_tags['claimReview_url'].isin(claim_topics_gold['claimReview_url'])]
 
-    test_ws = "africacheck"
+    test_ws = "fullfact"
     wandb.config.test_ws = test_ws
     train_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] != test_ws]
     dev_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] == test_ws]
@@ -302,13 +302,18 @@ if __name__ == '__main__':
                                                                  clip=0.05,
                                                                  disable_torch_grad_focal_loss=False).cuda()
 
-    start_from_features = False
+    #start_from_features = True
+    start_from_features = "roberta.encoder.layer.11"
     wandb.config.start_from_features = start_from_features
     if start_from_features:
+        if type(start_from_features) == bool:
+            until_layer = "classifier"
+        elif type(start_from_features) == str:
+            until_layer = start_from_features
         req_grad = False
         for n, param in model.named_parameters():
             param.requires_grad = req_grad
-            if "classifier" in n:
+            if until_layer in n:
                 req_grad = True
 
             print(f'Parameters {n} require grad: {param.requires_grad}')
