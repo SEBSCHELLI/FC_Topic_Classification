@@ -77,7 +77,7 @@ class EvaluateCB(TrainerCallback):
         dev_metrics = {f'dev/{k}': v for k, v in dev_metrics.items()}
         metrics.update(dev_metrics)
 
-        dev_data.to_pickle(f'{output_dir}/dev_data_epoch_{epoch}.pkl')
+        dev_data.to_pickle(f'{output_dir}/dev_data_epoch_{epoch}.pkl', protocol=4)
 
         # test data
         test_pred_output = trainer.predict(test_dataset)
@@ -103,7 +103,7 @@ class EvaluateCB(TrainerCallback):
         test_metrics = {f'test/{k}': v for k, v in test_metrics.items()}
         metrics.update(test_metrics)
 
-        test_data.to_pickle(f'{output_dir}/test_data_epoch_{epoch}.pkl')
+        test_data.to_pickle(f'{output_dir}/test_data_epoch_{epoch}.pkl', protocol=4)
 
         wandb.log(metrics)
 
@@ -280,7 +280,7 @@ if __name__ == '__main__':
     # train_data_other = train_data_other.sample(n=200, random_state=0)
     # train_data_not_other = train_data[train_data['transformed_extra_tags'].apply(lambda x: x != ['Other'])]
     # train_data = pd.concat([train_data_other, train_data_not_other])
-    exclude_ws = "fullfact"
+    exclude_ws = "factcheck_afp"
     wandb.config.exclude_ws = exclude_ws
 
     train_data = train_data[train_data['claimReview_source'] != "exclude_ws"]
@@ -414,4 +414,4 @@ if __name__ == '__main__':
         claimskg_df_with_tags[f'{cat}_pred'] = predictions[:, idx]
         claimskg_df_with_tags[f'{cat}_score'] = sigmoid(pred_output.predictions[:, idx])
 
-    claimskg_df_with_tags.to_pickle(f'{output_dir}/final_data.pkl')
+    claimskg_df_with_tags.to_pickle(f'{output_dir}/final_data.pkl', protocol=4)
