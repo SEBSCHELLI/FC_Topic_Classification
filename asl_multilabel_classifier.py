@@ -271,7 +271,7 @@ if __name__ == '__main__':
     claimskg_df_with_tags = claimskg_df_with_tags[claimskg_df_with_tags['transformed_extra_tags'].apply(lambda x: True if len(x) > 0 else False)]
     claimskg_df_with_tags = claimskg_df_with_tags[~claimskg_df_with_tags['claimReview_url'].isin(claim_topics_gold['claimReview_url'])]
 
-    test_ws = "truthorfiction"
+    test_ws = "politifact"
     wandb.config.test_ws = test_ws
     train_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] != test_ws]
     dev_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] == test_ws]
