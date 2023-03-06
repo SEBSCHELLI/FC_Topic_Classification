@@ -60,13 +60,14 @@ class EvaluateCB(TrainerCallback):
 
         dev_metrics = {}
         for idx, cat in enumerate(mlb.classes_):
-            ap = average_precision_score(labels[:, idx], dev_pred_output.predictions[:, idx])
-            pre = precision_score(labels[:, idx], predictions[:, idx])
-            re = recall_score(labels[:, idx], predictions[:, idx])
-            dev_metrics.update({f'{cat}_ap': ap,
-                                f'{cat}_prec': pre,
-                                f'{cat}_rec': re,
-                                })
+            if cat in dev_cats:
+                ap = average_precision_score(labels[:, idx], dev_pred_output.predictions[:, idx])
+                pre = precision_score(labels[:, idx], predictions[:, idx])
+                re = recall_score(labels[:, idx], predictions[:, idx])
+                dev_metrics.update({f'{cat}_ap': ap,
+                                    f'{cat}_prec': pre,
+                                    f'{cat}_rec': re,
+                                    })
 
             dev_data[f'{cat}_pred'] = predictions[:, idx]
             dev_data[f'{cat}_score'] = sigmoid(dev_pred_output.predictions[:, idx])
@@ -274,6 +275,7 @@ if __name__ == '__main__':
     wandb.config.test_ws = test_ws
     train_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] != test_ws]
     dev_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] == test_ws]
+    dev_cats = dev_data.explode("transformed_extra_tags")['transformed_extra_tags'].unique().tolist()
     # train_data = claimskg_df_with_tags.sample(frac=0.8, random_state=0, replace=False).reset_index(drop=True).copy()
     # dev_data = claimskg_df_with_tags[~claimskg_df_with_tags['claimReview_url'].isin(train_data['claimReview_url'])].copy()
 
