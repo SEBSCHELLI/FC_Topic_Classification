@@ -280,10 +280,12 @@ if __name__ == '__main__':
     # train_data_other = train_data_other.sample(n=200, random_state=0)
     # train_data_not_other = train_data[train_data['transformed_extra_tags'].apply(lambda x: x != ['Other'])]
     # train_data = pd.concat([train_data_other, train_data_not_other])
-    exclude_ws = "factcheck_afp"
+    exclude_ws = "fullfact"
     wandb.config.exclude_ws = exclude_ws
 
-    train_data = train_data[train_data['claimReview_source'] != "exclude_ws"]
+    print(len(train_data))
+    train_data = train_data[train_data['claimReview_source'] != exclude_ws]
+    print(len(train_data))
 
     train_labels = mlb.transform(train_data['transformed_extra_tags'].tolist()) * 1.0
     train_data['label'] = train_labels.tolist()
