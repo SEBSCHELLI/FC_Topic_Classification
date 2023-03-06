@@ -312,9 +312,11 @@ if __name__ == '__main__':
             until_layer = start_from_features
         req_grad = False
         for n, param in model.named_parameters():
-            param.requires_grad = req_grad
+
             if until_layer in n:
                 req_grad = True
+
+            param.requires_grad = req_grad
 
             print(f'Parameters {n} require grad: {param.requires_grad}')
 
