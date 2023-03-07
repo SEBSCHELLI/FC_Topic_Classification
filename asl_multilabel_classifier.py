@@ -241,7 +241,7 @@ if __name__ == '__main__':
                                                            'max_len': 100 if input_type == 'claim' else 512},
                                       # 100 when claims
                                       'dataloader_config': {
-                                          'per_device_train_batch_size': 64 if input_type == 'claim' else 32,
+                                          'per_device_train_batch_size': 64 if input_type == 'claim' else 16,
                                           'per_device_eval_batch_size': 512 if input_type == 'claim' else 32}}
                      }
 
