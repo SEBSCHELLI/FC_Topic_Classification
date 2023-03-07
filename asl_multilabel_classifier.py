@@ -234,15 +234,15 @@ class ASL_RobertaForSequenceClassification(RobertaForSequenceClassification):
 if __name__ == '__main__':
     model_id = 'roberta-base'
 
-    input_type = 'claim'
+    input_type = 'claim+text'
 
     model_configs = {'roberta-base': {'name': 'roberta-base',
                                       'tokenizer_config': {'pretrained_model_name_or_path': 'roberta-base',
                                                            'max_len': 100 if input_type == 'claim' else 512},
                                       # 100 when claims
                                       'dataloader_config': {
-                                          'per_device_train_batch_size': 64 if input_type == 'claim' else 8,
-                                          'per_device_eval_batch_size': 512 if input_type == 'claim' else 8}}
+                                          'per_device_train_batch_size': 64 if input_type == 'claim' else 16,
+                                          'per_device_eval_batch_size': 512 if input_type == 'claim' else 32}}
                      }
 
     config = model_configs[model_id]
@@ -271,7 +271,7 @@ if __name__ == '__main__':
     claimskg_df_with_tags = claimskg_df_with_tags[claimskg_df_with_tags['transformed_extra_tags'].apply(lambda x: True if len(x) > 0 else False)]
     claimskg_df_with_tags = claimskg_df_with_tags[~claimskg_df_with_tags['claimReview_url'].isin(claim_topics_gold['claimReview_url'])]
 
-    test_ws = "politifact"
+    test_ws = "fullfact"
     wandb.config.test_ws = test_ws
     train_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] != test_ws]
     dev_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] == test_ws]
