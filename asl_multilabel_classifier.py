@@ -271,18 +271,19 @@ if __name__ == '__main__':
     claimskg_df_with_tags = claimskg_df_with_tags[claimskg_df_with_tags['transformed_extra_tags'].apply(lambda x: True if len(x) > 0 else False)]
     claimskg_df_with_tags = claimskg_df_with_tags[~claimskg_df_with_tags['claimReview_url'].isin(claim_topics_gold['claimReview_url'])]
 
-    test_ws = "politifact"
+    test_ws = "africacheck"
     wandb.config.test_ws = test_ws
     train_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] != test_ws]
     dev_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] == test_ws]
-    print(len(dev_data))
+
+    """print(len(dev_data))
     dev_data1 = dev_data[:int(0.5 * len(dev_data))].copy()
     dev_data2 = dev_data[~dev_data['claimReview_url'].isin(dev_data1['claimReview_url'])]
     print(len(dev_data1))
     print(len(dev_data2))
 
     train_data = pd.concat([train_data, dev_data2])
-    dev_data = dev_data1
+    dev_data = dev_data1"""
 
     dev_cats = dev_data.explode("transformed_extra_tags")['transformed_extra_tags'].unique().tolist()
     # train_data = claimskg_df_with_tags.sample(frac=0.8, random_state=0, replace=False).reset_index(drop=True).copy()
