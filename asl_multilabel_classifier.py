@@ -282,8 +282,8 @@ if __name__ == '__main__':
     print(len(dev_data1))
     print(len(dev_data2))
 
-    train_data = pd.concat([train_data, dev_data1])
-    dev_data = dev_data2
+    train_data = pd.concat([train_data, dev_data2])
+    dev_data = dev_data1
 
     dev_cats = dev_data.explode("transformed_extra_tags")['transformed_extra_tags'].unique().tolist()
     # train_data = claimskg_df_with_tags.sample(frac=0.8, random_state=0, replace=False).reset_index(drop=True).copy()
