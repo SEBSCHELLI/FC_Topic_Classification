@@ -344,8 +344,8 @@ if __name__ == '__main__':
                                                                  disable_torch_grad_focal_loss=False).cuda()
 
     #start_from_features = "classifier"
-    start_from_features = "roberta.encoder.layer.10"
-    #start_from_features = "roberta.encoder.layer.11"
+    #start_from_features = "roberta.encoder.layer.10"
+    start_from_features = "roberta.encoder.layer.11"
     wandb.config.start_from_features = start_from_features
     if start_from_features:
         req_grad = False
