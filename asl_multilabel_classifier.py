@@ -13,6 +13,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, avera
 from sklearn.preprocessing import MultiLabelBinarizer
 import torch.nn as nn
 from transformers.modeling_outputs import SequenceClassifierOutput
+from sklearn.model_selection import KFold
+from itertools import chain
+
 
 print(os.getcwd())
 if "FC_Topic_Classification" not in os.getcwd():
@@ -271,19 +274,47 @@ if __name__ == '__main__':
     claimskg_df_with_tags = claimskg_df_with_tags[claimskg_df_with_tags['transformed_extra_tags'].apply(lambda x: True if len(x) > 0 else False)]
     claimskg_df_with_tags = claimskg_df_with_tags[~claimskg_df_with_tags['claimReview_url'].isin(claim_topics_gold['claimReview_url'])]
 
+    """
     test_ws = "snopes"
     wandb.config.test_ws = test_ws
     train_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] != test_ws]
     dev_data = claimskg_df_with_tags[claimskg_df_with_tags['claimReview_source'] == test_ws]
-
-    print(len(dev_data))
+    """
+    """print(len(dev_data))
     dev_data1 = dev_data[:int(0.5 * len(dev_data))].copy()
     dev_data2 = dev_data[~dev_data['claimReview_url'].isin(dev_data1['claimReview_url'])]
     print(len(dev_data1))
     print(len(dev_data2))
 
     train_data = pd.concat([train_data, dev_data2])
-    dev_data = dev_data1
+    dev_data = dev_data1"""
+
+    n_folds = 5
+    wandb.config.n_folds = n_folds
+    kf = KFold(n_splits=n_folds, random_state=0, shuffle=True)
+    kf.get_n_splits(claimskg_df_with_tags)
+
+    fold_data_idxs = [fold_test_idxs for (_, fold_test_idxs) in kf.split(claimskg_df_with_tags)]
+
+    fold_idx = 0
+    wandb.config.fold_idx = fold_idx
+    dev_fold_idx = fold_idx
+    dev_fold_data_idxs = fold_data_idxs[dev_fold_idx]
+
+    train_fold_idxs = [(i + 1 + dev_fold_idx) % 5 for i in range(4)]
+    train_folds_data_idxs = [fold_data_idxs[train_fold_idx] for train_fold_idx in train_fold_idxs]
+    train_folds_data_idxs = list(chain.from_iterable(train_folds_data_idxs))
+
+    train_data = claimskg_df_with_tags.iloc[train_folds_data_idxs]
+    dev_data = claimskg_df_with_tags.iloc[dev_fold_data_idxs]
+
+    move_to_dev_data = train_data[train_data['claimReview_url'].isin(dev_data['claimReview_url'])]
+    train_data = train_data[~train_data['claimReview_url'].isin(dev_data['claimReview_url'])]
+    dev_data = pd.concat([dev_data, move_to_dev_data])
+
+    train_data_ids = set(train_data['claimReview_url'].tolist())
+    dev_data_ids = set(dev_data['claimReview_url'].tolist())
+    assert len(train_data_ids.intersection(dev_data_ids)) == 0
 
     dev_cats = dev_data.explode("transformed_extra_tags")['transformed_extra_tags'].unique().tolist()
     # train_data = claimskg_df_with_tags.sample(frac=0.8, random_state=0, replace=False).reset_index(drop=True).copy()
